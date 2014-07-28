@@ -4,3 +4,6 @@
 [submodule "debugger_sw/fmc-delay/fine-delay-sw"]
 	path = debugger_sw/fmc-delay/fine-delay-sw
 	url = git://ohwr.org/fmc-projects/fmc-delay-1ns-8cha/fine-delay-sw.git
+[submodule "debugger_sw/remote_tools/caloe"]
+	path = debugger_sw/remote_tools/caloe
+	url = https://github.com/klyone/caloe.git
