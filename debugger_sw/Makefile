@@ -126,7 +126,7 @@ wrpc: gitmodules
 # who didn't read carefully the manual won't get confused
 gitmodules:
 	@test -d $(WRPC_DIR)/inlcude || echo "Checking out submodules"
-	@test -d $(WRPC_DIR)/inlcude || git submodule update --init
+	@test -d $(WRPC_DIR)/inlcude || cd .. && git submodule update --init
 
 
 # following targets from Makefile.kconfig

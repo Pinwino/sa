@@ -1,7 +1,6 @@
 #
 # Automatically generated make config: don't edit
 #
-CONFIG_WR_NODE=y
 # CONFIG_FINE_DEL_NODE is not set
 CONFIG_DEBUGGER=y
 CONFIG_PRINT_BUFSIZE=128
@@ -11,8 +10,7 @@ CONFIG_RAMSIZE=38912
 CONFIG_STACKSIZE=2048
 CONFIG_HEAPSIZE=1024
 CONFIG_ALING=4
-CONFIG_UART=y
-# CONFIG_MEM_CHECK_CMD is not set
+CONFIG_MEM_CHECK_CMD=y
 
 #
 # dbg-sw is tainted if you change the following options
