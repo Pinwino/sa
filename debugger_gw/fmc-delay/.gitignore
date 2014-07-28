@@ -1,0 +1,11 @@
+*.*\#
+\#*
+.\#*
+*.*~
+modelsim.ini
+*.wlf
+*.vstf
+work
+*.bak
+spec/*
+transcript
