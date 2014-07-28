@@ -1,0 +1,118 @@
+mainmenu "Debugger Core software configuration"
+
+config FINE_DEL_NODE
+	bool "Build code for Fine Delay Stand-Alone node"
+	default n
+	
+config DEBUGGER
+	bool
+	default !FINE_DEL_NODE
+
+# most options with no prompt here are prompted-for in the "advanced" section
+
+config PRINT_BUFSIZE
+	int
+	default 256
+
+config PRINTF_FULL
+	boolean
+	default y
+
+config RAMINIT
+	int
+	default 0x00000000
+
+config RAMSIZE
+	int
+	default 92160
+
+config STACKSIZE
+	int  
+	default 22528
+	
+config HEAPSIZE
+	int 
+	default 12480
+	
+config ALING
+	int
+	default 4
+
+config MEM_CHECK_CMD
+	boolean"Command for memory checking/debbuging"
+	default y
+
+#
+# This is a set of configuration options that should not be changed by
+# normal users. If the "developer" menu is used, the binary is tainted.
+
+comment "dbg-sw is tainted if you change the following options"
+config DEVELOPER
+	bool "Advanced configurations, only for developers"
+	help
+	  The following options are new features under testing, or
+	  special customizations not normally useful for people not
+	  directly working on this package.  Please don't use unless
+	  you are a developer of wrpc-sw.
+
+config RAMSIZE
+	depends on DEVELOPER
+	int "Size of the RAM in the FPGA for this program"
+	default 90112
+	help
+	  The usual configuration for debugger_sw is 0x16000 bytes
+	  (i.e. 88kB = 90112 bytes) but if your project has less or
+	  more features you may want to adjust the FPGA size and
+	  choose your preferred value here.
+
+config STACKSIZE
+	depends on DEVELOPER
+	int "Size of the stack area needed by this program"
+	default 22528
+	help
+	  The linker complains if the code doesn't fit into RAM, but
+	  we must also consider the stack, or the program will crash
+	  at run time. (However, we have a detector for overflows).
+	  
+config HEAPSIZE
+	depends on DEVELOPER
+	int "Size of the heap area needed by this program"
+	default 12480
+
+config PRINT_BUFSIZE
+	depends on DEVELOPER
+	int "Size for the temporary output string of pp_printf"
+	default 256
+	help
+	  This buffer is constant storage (i.e. wasted space), but it
+	  also constraints the maximum lenght of text that can be written
+	  in a single call to printf.
+
+choice
+	prompt "Implementation of pp_printf"
+	depends on DEVELOPER
+
+config PRINTF_XINT
+	bool "hex-and-int"
+	help
+	  This selects a printf that can only print decimal and hex
+	  numbers, without obeying the format modifiers. %c and %s are
+	  supported too, and %p is equivalent to %x.
+	  See pp_printf/README for details.
+
+config PRINTF_FULL
+	bool "full"
+	help
+	  This selects an implementation that supports all standard
+	  formats with modifiers, like "%08X" and "%.5s". It costs
+	  around 2k of compiled code more than XINT.
+	  See pp_printf/README for details.
+
+config PRINTF_MINI
+	bool "minimal"
+	help
+	  This selects a printf that prints all integers as hex,
+	  without obeying the format modifiers. %c and %s are
+	  supported too. See pp_printf/README for details.
+	  This is not probably what you want for debbuger-sw.
+endchoice
