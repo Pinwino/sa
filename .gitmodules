@@ -1,3 +1,6 @@
 [submodule "debugger_sw/wrpc-sw"]
 	path = debugger_sw/wrpc-sw
 	url = git://ohwr.org/hdl-core-lib/wr-cores/wrpc-sw.git
+[submodule "debugger_sw/fmc-delay/fine-delay-sw"]
+	path = debugger_sw/fmc-delay/fine-delay-sw
+	url = git://ohwr.org/fmc-projects/fmc-delay-1ns-8cha/fine-delay-sw.git
