@@ -7,3 +7,6 @@
 [submodule "debugger_sw/remote_tools/caloe"]
 	path = debugger_sw/remote_tools/caloe
 	url = https://github.com/klyone/caloe.git
+[submodule "debugger_gw/fmc-delay/fmc-delay-1ns-8cha"]
+	path = debugger_gw/fmc-delay/fmc-delay-1ns-8cha
+	url = git://ohwr.org/fmc-projects/fmc-delay-1ns-8cha.git
