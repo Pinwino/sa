@@ -17,7 +17,7 @@
 #include <string.h>
 #include <caloe/lib/access_internals.h>
 #include <errno.h>
-
+#include <unistd.h>
 //caloe
 #define is_config_int 	0
 #define nbytes 			100
@@ -66,7 +66,8 @@ int main (int argc, char ** argv)
 	char *line = (char *) malloc (nbytes + 1);
 	
 	const char tok[] = " ", t[]="/";
-   	char *ret, *ptr;
+   	char *ret;
+   	char *ptr;
 
 	char *ip = (char *) malloc(conf_buf);
 	char * offset;
@@ -123,7 +124,6 @@ int main (int argc, char ** argv)
 		}
 	}
 	
-	printf("argv[%i] = %s, optarg %s\n", optind, argv[optind], optarg);
 	if (optind >= argc) {
 		fprintf(stderr, "%s: Expected new ram file after options.\n",
 			argv[0]);
@@ -158,12 +158,8 @@ int main (int argc, char ** argv)
 		             argv[0], argv[optind], strerror(errno));
 		exit(1);
 	}
-	fseek(fp, 0, SEEK_END);
-	length = ftell(fp) - 3*17;
-	fseek(fp, 0, SEEK_SET);
-	
-  	while(length > ftell(fp)){
-		if (fgets(line, nbytes, fp)) {
+
+		while (fgets(line, nbytes, fp) != NULL) {
 			//I know... don't judge
 			ret=strpbrk(line, "\n");
 			*ret=line_end;
@@ -173,7 +169,7 @@ int main (int argc, char ** argv)
 			val = strpbrk(offset, " ");
 			*val=line_end;
 			val++;
-			_offset = (uint32_t)strtol(offset, NULL, 16)*4;
+			_offset = (uint32_t)strtol(offset, &ptr, 16)*4;
 			if (ptr && *ptr)
 			{
 				fprintf(stderr, "    %s: ERROR read offset \"%08x\" is not an hex number\n",
@@ -181,21 +177,20 @@ int main (int argc, char ** argv)
 				exit(1);
 			}
 			
-			_val = (uint32_t)strtol(val, NULL, 16);
-			if (ptr && *ptr)
+			_val = (uint32_t) strtol(val, &ret, 16);
+			if (ret && *ret)
 			{
 				fprintf(stderr, "    %s: ERROR read value \"%08x\" is not an hex number\n",
 				              argv[0], _val);
 				exit(1);
 			}
-		}
 		cntr++;
 
 		build_access_caloe(base, _offset, _val, 0, MASK_OR, is_config_int,
 		                      WRITE, SIZE_4B, &nc, &access);
 		if ((execute_caloe(&access)) < 0)
 			exit(1);
-			
+		
 		if ((uint32_t) access.value != _val)
 		{
 			fprintf(stderr, 
@@ -208,11 +203,15 @@ int main (int argc, char ** argv)
 			        "        Converted values: offset %08x, value %08x\n",
 			              _offset, _val);
 			fprintf(stderr,
+			        "        Written values: offset %08x, value %08x\n",
+			              _offset, access.value);
+			fprintf(stderr,
 		            "            Difference (written value - read value): %d\n",
 		                 (_val - (uint32_t) access.value));
 
 			exit(1);
 		}
+		access.value = 0;
 	}
 	
 	fclose(fp);
