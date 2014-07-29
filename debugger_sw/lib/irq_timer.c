@@ -3,6 +3,7 @@
 #include <hw/irq_timer.h>
 #include <errno.h>
 #include <pp-printf.h>
+#include <dbg.h>
 #define mprintf pp_printf
 #define vprintf pp_vprintf
 #define sprintf pp_sprintf
@@ -66,10 +67,10 @@ int irq_timer_sel_cascade(struct irq_timer  *itmr, uint8_t option){
 	return 0;
 }
 
-void irq_timer_set_time(struct irq_timer  *itmr, unsigned long expires){
-
-	/* 2^32 > 1*10⁶ doenst make any sense to set the high part */
-	irq_timer_writel(itmr, expires & 0xffffffff, TM_TIME_LO);
+void irq_timer_set_time(struct irq_timer  *itmr, unsigned long  long expires){
+	
+	irq_timer_writel(itmr, (uint32_t) (expires >> 32), TM_TIME_HI);
+	irq_timer_writel(itmr, (uint32_t) expires, TM_TIME_LO);
 		
 }
 

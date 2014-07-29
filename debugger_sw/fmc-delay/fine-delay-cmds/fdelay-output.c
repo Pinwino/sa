@@ -50,10 +50,8 @@ static void fdelay_add_ps(struct fdelay_time *p, uint64_t ps)
 	uint32_t coarse, frac;
 
 	/* FIXME: this silently fails with ps > 10^12 = 1s */
-	//coarse = ps / 8000;
 	tmp = div64_u64_rem(ps, 8000LLU, &ps);
 	coarse = (uint32_t) tmp;
-	//frac = ((ps % 8000) << 12) / 8000;
 	frac = div_u64_rem((ps << 12), 8000LLU, NULL);
 
 	p->frac += frac;
@@ -141,32 +139,6 @@ int fdelay_config_pulse(struct fd_dev *fd, int ch, struct fdelay_pulse *pulse)
 		break;
 	}
 	
-
-	/*a[FD_ATTR_OUT_START_H] = (uint32_t) (pulse->start.utc >> 32);
-	a[FD_ATTR_OUT_START_L] = (uint32_t) (pulse->start.utc);
-	a[FD_ATTR_OUT_START_COARSE] = pulse->start.coarse;
-	a[FD_ATTR_OUT_START_FINE] = pulse->start.frac;
-	a[FD_ATTR_OUT_END_H] = (uint32_t)(pulse->end.utc >> 32);
-	a[FD_ATTR_OUT_END_L] = (uint32_t) (pulse->end.utc);
-	a[FD_ATTR_OUT_END_COARSE] = pulse->end.coarse;
-	a[FD_ATTR_OUT_END_FINE] = pulse->end.frac;
-	a[FD_ATTR_OUT_DELTA_L] = (uint32_t) (pulse->loop.utc); /* only 0..f *
-	a[FD_ATTR_OUT_DELTA_COARSE] = pulse->loop.coarse; /* only 0..f *
-	a[FD_ATTR_OUT_DELTA_FINE] = pulse->loop.frac; /* only 0..f *
-	
-	//fd_ch_writel(fd, ch, fd->ch[ch].frr_cur, 			FD_REG_FRR);
-	fd_ch_writel(fd, ch, a[FD_ATTR_OUT_START_H], 		FD_REG_U_STARTH);
-	fd_ch_writel(fd, ch, a[FD_ATTR_OUT_START_L], 		FD_REG_U_STARTL);
-	fd_ch_writel(fd, ch, a[FD_ATTR_OUT_START_COARSE], 	FD_REG_C_START);
-	fd_ch_writel(fd, ch, a[FD_ATTR_OUT_START_FINE], 	FD_REG_F_START);
-	fd_ch_writel(fd, ch, a[FD_ATTR_OUT_END_H], 			FD_REG_U_ENDH);
-	fd_ch_writel(fd, ch, a[FD_ATTR_OUT_END_L],      	FD_REG_U_ENDL);	
-	fd_ch_writel(fd, ch, a[FD_ATTR_OUT_END_COARSE], 	FD_REG_C_END);	
-	fd_ch_writel(fd, ch, a[FD_ATTR_OUT_END_FINE],   	FD_REG_F_END);
-	fd_ch_writel(fd, ch, a[FD_ATTR_OUT_DELTA_L],      	FD_REG_U_DELTA);
-	fd_ch_writel(fd, ch, a[FD_ATTR_OUT_DELTA_COARSE], 	FD_REG_C_DELTA);
-	fd_ch_writel(fd, ch, a[FD_ATTR_OUT_DELTA_FINE],   	FD_REG_F_DELTA);*/
-	
 	fd_ch_writel(fd, ch, (uint32_t) (pulse->start.utc >> 32), FD_REG_U_STARTH);
 	fd_ch_writel(fd, ch, ((uint32_t) (pulse->start.utc)),     FD_REG_U_STARTL);
 	fd_ch_writel(fd, ch, pulse->start.coarse,                 FD_REG_C_START);
@@ -203,22 +175,6 @@ int fdelay_config_pulse(struct fd_dev *fd, int ch, struct fdelay_pulse *pulse)
 	 * Most likely the calculation below fails with negatives, but
 	 * with negative spacing we get no pulses, and fine is irrelevant
 	 */
-
-	/*delta.tv_sec = a[FD_ATTR_OUT_DELTA_L];
-	delta.tv_nsec = a[FD_ATTR_OUT_DELTA_COARSE] * 8;
-	width.tv_sec = ((uint64_t)(a[FD_ATTR_OUT_END_H]) << 32
-			| a[FD_ATTR_OUT_END_L])
-		- ((uint64_t)(a[FD_ATTR_OUT_START_H]) << 32
-		   | a[FD_ATTR_OUT_START_L]);
-	if (a[FD_ATTR_OUT_END_COARSE] > a[FD_ATTR_OUT_START_COARSE]) {
-		width.tv_nsec = 8 * a[FD_ATTR_OUT_END_COARSE]
-			- 8 * a[FD_ATTR_OUT_START_COARSE];
-	} else {
-		width.tv_sec--;
-		width.tv_nsec = NSEC_PER_SEC 
-			- 8 * a[FD_ATTR_OUT_START_COARSE]
-			+ 8 * a[FD_ATTR_OUT_END_COARSE];		
-	}*/
 	
 	delta.tv_sec =((uint32_t) (pulse->loop.utc));
 	delta.tv_nsec = (pulse->loop.coarse) * 8;

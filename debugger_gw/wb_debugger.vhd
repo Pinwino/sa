@@ -46,13 +46,13 @@ use work.synthesis_descriptor.all;
 
 entity wb_debugger is
 	generic(
-    g_dbg_dpram_size	    : integer;
+    g_dbg_dpram_size      : integer;
     g_dbg_init_file       : string;
     g_reset_vector	      : t_wishbone_address := x"00000000"; -- if wb_irq_lm32 from general-cores::proposed-master
-    g_msi_queues 	        : natural := 1;
-    g_profile		          : string  := "medium_icache_debug";
+    g_msi_queues 	      : natural := 1;
+    g_profile		      : string  := "medium_icache_debug";
     g_internal_time_ref   : boolean := true;
-    g_timers			        : integer := 1;
+    g_timers              : integer := 1;
     g_slave_interface_mode: t_wishbone_interface_mode := PIPELINED;
     g_slave_granularity   : t_wishbone_address_granularity := BYTE);
   port(
@@ -105,10 +105,10 @@ architecture Behavioral of wb_debugger is
   begin
     if(g_dbg_init_file = "debugger") then
       report "[Dbg Core] Using debugging firmware." severity note;
-      return "dbg_code.ram";
+      return "../../dbg.ram";
     elsif (g_dbg_init_file = "FD_node") then
       report "[Dbg Core] Using FMC Delay stand alone node firmware." severity note;
-      return "fd_std.ram";
+      return "../../fd_std.ram";
     else
       report "[Dbg Core] Using user provided firmware."  severity note;
       return g_dbg_init_file;
@@ -135,11 +135,11 @@ architecture Behavioral of wb_debugger is
   constant c_MASTER_LM32    : integer := 0;
   constant c_MASTER_ADAPT   : integer := 2;
   
-  constant c_EXT_BRIDGE			: integer := 0;
-  constant c_SLAVE_DPRAM		: integer := 1;
+  constant c_EXT_BRIDGE		: integer := 0;
+  constant c_SLAVE_DPRAM    : integer := 1;
   constant c_SLAVE_UART     : integer := 2;
   constant c_SLAVE_IRQ_CTRL	: integer := 3;
-  constant c_SLAVE_TICS		 	: integer := c_SLAVE_IRQ_CTRL + f_generate_time_ref;
+  constant c_SLAVE_TICS	 	: integer := c_SLAVE_IRQ_CTRL + f_generate_time_ref;
   constant c_SLAVE_TIMER_IRQ: integer := c_SLAVE_TICS + f_generate_irq_timer;
 
   constant c_EXT_BRIDGE_SDB : t_sdb_bridge := f_xwb_bridge_manual_sdb(x"000effff", x"00000000");
@@ -195,7 +195,7 @@ architecture Behavioral of wb_debugger is
    
   signal dummy_debugger_ram_wbb_i : t_wishbone_slave_in;
 
-  signal forced_lm32_reset_n : std_logic := '0';
+  signal forced_lm32_reset_n : std_logic := '1';
   
   signal irq_slave_i : t_wishbone_slave_in_array(g_msi_queues-1 to 0);
   signal irq_slave_o : t_wishbone_slave_out_array(g_msi_queues-1 to 0);

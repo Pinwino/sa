@@ -57,19 +57,24 @@ struct irq_timer {
 	uint8_t cascade;
 };
 
-static inline uint32_t irq_timer_readl(struct irq_timer *itmr, unsigned long reg){
+static inline uint32_t irq_timer_readl(struct irq_timer *itmr, 
+                                                        unsigned long reg)
+
+{
 	
 	uint32_t *p = (uint32_t *) (itmr->timer_addr_base + reg);
 	return *p;
 };
 
-static inline void irq_timer_writel(struct irq_timer *itmr, uint32_t v, unsigned long reg)
+static inline void irq_timer_writel(struct irq_timer *itmr, uint32_t v, 
+                                                         unsigned long reg)
 {
 	 uint32_t *p = (uint32_t *) (itmr->timer_addr_base + reg);
 	 *p = v;
 };
 
-static inline void irq_timer_reset (struct irq_timer *itmr){
+static inline void irq_timer_reset (struct irq_timer *itmr)
+{
 	irq_timer_writel(itmr, 0x1, RST);
 };
 
@@ -77,7 +82,7 @@ uint8_t irq_timer_check_armed (struct irq_timer *itmr);
 int irq_timer_arm (struct irq_timer *, uint8_t option);
 int irq_timer_time_mode (struct irq_timer  *itmr, uint8_t option);
 int irq_timer_sel_cascade(struct irq_timer  *itmr, uint8_t option);
-void irq_timer_set_time(struct irq_timer  *itmr, unsigned long expires);
+void irq_timer_set_time(struct irq_timer  *itmr, unsigned long long expires);
 //static inline void irq_timer_arm (struct irq_timer *itmr, int){}
 
 #endif /* __IRQ_TIMER_H__ */

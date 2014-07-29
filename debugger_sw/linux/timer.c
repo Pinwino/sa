@@ -13,14 +13,14 @@ int setup_timer(struct timer_list *timer, void (*function)(unsigned long), unsig
 	return 0;
 }
 
-int mod_timer(struct timer_list *timer, unsigned long expires){
+int mod_timer(struct timer_list *timer, unsigned long long expires){
 	uint32_t *dir;
 
 	timer->expires=expires;
 	
 	irq_timer_writel(&timer->itmr, 0x0, TIMER_SEL);
 	if(expires != timer->itmr.timer_dead_line || !irq_timer_check_armed(&timer->itmr)){
-		timer->itmr.timer_dead_line = 0xabcdfe6b280;
+		timer->itmr.timer_dead_line = 0x3B9ACA0;
 		irq_timer_set_time(&timer->itmr, timer->itmr.timer_dead_line);
 	}
 	if(!irq_timer_check_armed(&timer->itmr)){

@@ -11,6 +11,7 @@ git_submodules:
 	test -d $(ETHERBONE_DIR)/api  || git submodule update --init
 	
 clean:
+	rm -f *.ram
 	$(MAKE) -C $(FMC_DEL_DIR)/spec -f Makefile $@
 
 mrproper:

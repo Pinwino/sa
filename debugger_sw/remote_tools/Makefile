@@ -77,7 +77,8 @@ build-etherbone: git_etherbone caloe/etherbone
 	
 git_etherbone:
 	@test -f ./caloe -d $(ETHERBONE_DIR)/api || echo "Checking out submodules"
-	@test -f ./caloe -d $(ETHERBONE_DIR)/api || $(MAKE) -C ./caloe -f Makefile etherbone-submodule
+	@test -f ./caloe -d $(ETHERBONE_DIR)/api || \
+	$(MAKE) -C ./caloe -f Makefile etherbone-submodule
 	
 # When using c++, I don't do much work (only very simple rules). As developed
 # at the final stages I decided to keep it simple and relay on the author's 

@@ -116,11 +116,15 @@ tools:
 	$(MAKE) -C $(WRPC_DIR)/tools -f Makefile
 
 remote_tools:
-	$(MAKE) -C remote_tools
+	$(MAKE) -C $@
+
+install: remote_tools
+	$(MAKE) -C remote_tools $@
 	
 wrpc: gitmodules
 	$(MAKE) -C $(WRPC_DIR) etherbone_defconfig
 	$(MAKE) -C $(WRPC_DIR)
+	@cp $(WRPC_DIR)/wrc.ram ./wrc-ethb.ram
 
 # if needed, check out the submodules (first time only), so users
 # who didn't read carefully the manual won't get confused

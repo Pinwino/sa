@@ -38,13 +38,20 @@ extern caddr_t  heap;
 extern uint32_t _HEAP_START;
 extern uint32_t _HEAP_END;
 int init_iterator=0;
+extern int fd_calib_period_s;
+int irq_count = 0;
 #define ENDRAM_MAGIC 0xbadc0ffe
 
 void _irq_entry()
 {
-	mprintf("yes\n");
+	irq_count++;
 	irq_ctrl_pop();
-	fd.temp_timer.function(fd.temp_timer.data);
+	if (irq_count == fd_calib_period_s)
+	{
+		mprintf("Interruption\n");
+		fd.temp_timer.function(fd.temp_timer.data);
+		irq_count = 0;
+	}
 	clear_irq();
 }
 
@@ -154,9 +161,7 @@ static inline void manage_error (int err_value){
 
 int main(void)
 {
-	int wrc_ui_mode = UI_SHELL_MODE;
-
-	int i, j, *dir, *ind, sel, ch, eep;
+	int ch;
 	
 	_endram = ENDRAM_MAGIC;
 	
@@ -164,9 +169,10 @@ int main(void)
 	uart_init_hw();
 	mprintf("\nWR-Dbg: starting up...\n");
 	
+	usleep(750*1000);
+	
 	usleep_init();
 	shell_init();
-	enable_irq();
 
 	mprintf("_endram %08x\n", &_endram);
 	mprintf("_fstack %08x\n", &_fstack);
@@ -174,18 +180,19 @@ int main(void)
 	mprintf("_HEAP_START %08x\n", &_HEAP_START);
 	mprintf("_HEAP_END %08x\n", &_HEAP_END);
 
-	if(1){
-	mprintf("\n\n**********************************************************\n"
-	            "*           FMC DEALY on-SPEC STAND-ALONE NODE           *\n"
-	            "*                           by                           *\n"
-                "*                      Jose Jimenez                      *\n"
-                "*                                                        *\n");
-	mprintf(    "*                                                        *\n"
-	            "*                      - WARNING -                       *\n"
-	            "*     This is a beta version, please report bugs to:     *\n"
-                "*            <fmc-delay-1ns-8cha-sa@ohwr.org>            *\n"
-                "**********************************************************\n\n");
-}
+	
+	mprintf(
+		"\n\n**********************************************************\n"
+	        "*           FMC DEALY on-SPEC STAND-ALONE NODE           *\n"
+	        "*                           by                           *\n"
+            "*                      Jose Jimenez                      *\n"
+            "*                                                        *\n");
+	mprintf("*                                                        *\n"
+	        "*                      - WARNING -                       *\n"
+	        "*     This is a beta version, please report bugs to:     *\n"
+            "*            <fmc-delay-1ns-8cha-sa@ohwr.org>            *\n"
+            "**********************************************************\n\n");
+
 
 	fd.fd_regs_base = BASE_FINE_DELAY;
 	fd.fd_owregs_base= fd.fd_regs_base + 0x500;
@@ -203,9 +210,9 @@ int main(void)
 				fd.fmc = &fmc_loc; /* to prevent a malloc */
 				fd.fmc->eeprom_len = SPEC_I2C_EEPROM_SIZE;
 				heap = NULL;
-				if ((fd.fmc->eeprom = malloc((size_t) (fd.fmc->eeprom_len))) == NULL)
+				if((fd.fmc->eeprom=malloc((size_t)(fd.fmc->eeprom_len)))==NULL)
 				{
-					kernel_dev(0, "Malloc falied.");
+					kernel_dev(0, "Malloc failed.");
 					init_iterator = stop+1;
 				}
 				manage_error(fd_eeprom_read(&fd, 0x50, 0, fd.fmc->eeprom,
@@ -241,6 +248,7 @@ int main(void)
 
 			case 5:
 				fd_reset_again(&fd);
+				enable_irq();
 				manage_error(fd_acam_init(&fd));
 				init_iterator++;
 			break;
@@ -250,7 +258,7 @@ int main(void)
 				int tcr = fd_readl(&fd, FD_REG_TCR);
 				/* let it run... */
 				fd_writel(&fd, FD_GCR_INPUT_EN, FD_REG_GCR);
-				/* wtf!!! */
+				/* stay put*/
 				if(tcr != fd_readl(&fd, FD_REG_TCR))
 					fd_writel(&fd, tcr, FD_REG_TCR);
 				init_iterator++;

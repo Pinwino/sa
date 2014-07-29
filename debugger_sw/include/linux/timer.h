@@ -11,7 +11,7 @@
 };
  
 int setup_timer(struct timer_list *timer, void (*function)(unsigned long), unsigned long data);
-int mod_timer(struct timer_list *timer, unsigned long expires);
+int mod_timer(struct timer_list *timer, unsigned long long expires);
  
 /*struct tvec_base {
 	spinlock_t lock;
