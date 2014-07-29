@@ -98,7 +98,7 @@ package debugger_pkg is
     wbd_width     => x"7",                 -- 8/16/32-bit port granularity
     sdb_component => (
       addr_first  => x"0000000000000000",
-      addr_last   => x"00000000000201ff",
+      addr_last   => x"000000000003ffff",
       product     => (
         vendor_id => x"a1eBEEFc0ffeeBED",  -- Jose Jimenez Motel. Open 24/7. Next exit.
         device_id => x"c0a110de",          -- obvious (sadly)

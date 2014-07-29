@@ -223,8 +223,10 @@ begin
   controller : process (clk_sys)
   begin 
     if (rising_edge(clk_sys)) then
-      if (dbg_control_select = '0' and (state_control /= x"ffffffffff")) then
-        state_control <= state_control + 1;
+      if (dbg_control_select = '0') then
+        if (state_control /= x"ffffffffff") then
+          state_control <= state_control + 1;
+        end if;
 	  else
         if ((state_control /= x"0000000000") and (state_control <= x"3B9ACA0")) then --0.5s
           forced_lm32_reset_n <= not forced_lm32_reset_n;
@@ -400,8 +402,9 @@ begin
       master_i  => cnx_slave_out(c_MASTER_ADAPT),
       master_o  => cnx_slave_in(c_MASTER_ADAPT),
       
-      sl_adr_i(c_wishbone_address_width-1 downto 16)  => (others => '0'),
-      sl_adr_i(15 downto 0)   => slave_i.adr(15 downto 0),
+      -- Slave interface 0x0 to 0x3ffff
+      sl_adr_i(c_wishbone_address_width-1 downto 18)  => (others => '0'),
+      sl_adr_i(17 downto 0) => slave_i.adr(17 downto 0),
       sl_dat_i   => slave_i.dat,
       sl_sel_i   => slave_i.sel,
       sl_cyc_i   => slave_i.cyc,

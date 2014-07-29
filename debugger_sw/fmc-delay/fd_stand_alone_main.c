@@ -48,7 +48,6 @@ void _irq_entry()
 	irq_ctrl_pop();
 	if (irq_count == fd_calib_period_s)
 	{
-		mprintf("Interruption\n");
 		fd.temp_timer.function(fd.temp_timer.data);
 		irq_count = 0;
 	}
@@ -169,9 +168,9 @@ int main(void)
 	uart_init_hw();
 	mprintf("\nWR-Dbg: starting up...\n");
 	
+	usleep_init();
 	usleep(750*1000);
 	
-	usleep_init();
 	shell_init();
 
 	mprintf("_endram %08x\n", &_endram);
