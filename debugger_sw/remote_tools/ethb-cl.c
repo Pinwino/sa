@@ -157,39 +157,39 @@ int main (int argc, char ** argv)
 		exit(1);
 	}
 
-		while (fgets(line, nbytes, fp) != NULL) {
-			s_val[0] = line; /* wtf? why only works this way? */
-			
-			/* parse chain */
-			for (i=1; i<=2; i++)
-			{
-				s_val[i]=strpbrk(s_val[i-1], " ");
-				*s_val[i]=line_end;
-				s_val[i]++;
-			}
-			
-			/* eliminate /n */
-			s_val[0]=strpbrk(s_val[2], "\n");
-			*s_val[0]=line_end;
+	while (fgets(line, nbytes, fp) != NULL) {
+		s_val[0] = line; /* wtf? why only works this way? */
 
-			for (i=0; i<=1; i++)
+		/* parse chain */
+		for (i=1; i<=2; i++)
+		{
+			s_val[i]=strpbrk(s_val[i-1], " ");
+			*s_val[i]=line_end;
+			s_val[i]++;
+		}
+
+		/* final touches */
+		s_val[0]=strpbrk(s_val[2], "\n");
+		*s_val[0]=line_end;
+
+		for (i=0; i<=1; i++)
+		{
+			u_val[i] = (uint32_t)strtol(s_val[i+1], &ptr, 16)*(4-3*i);
+			if (ptr && *ptr)
 			{
-				u_val[i] = (uint32_t)strtol(s_val[i+1], &ptr, 16)*(4-3*i);
-				if (ptr && *ptr)
-				{
-					fprintf(stderr,
-				    "    %s: ERROR \"%s\" is not an hex number\n",
-				              argv[0], s_val[i]);
-					exit(1);
-				}
+				fprintf(stderr,
+		     	    "    %s: ERROR \"%s\" is not an hex number\n",
+			                 argv[0], s_val[i]);
+			 	exit(1);
 			}
+		}
 		cntr++;
 
 		build_access_caloe(base, u_val[0], u_val[1], 0, MASK_OR, is_config_int,
 		                      WRITE, SIZE_4B, &nc, &access);
 		if ((execute_caloe(&access)) < 0)
 			exit(1);
-	
+
 		if ((uint32_t) access.value != u_val[1])
 		{
 			fprintf(stderr,
@@ -215,8 +215,8 @@ int main (int argc, char ** argv)
 	fclose(fp);
 	// Free access_caloe and network_connection memory
 	free_access_caloe(&access);
-	
+
 	printf("\nRAM successfully overwrited!\n");
-	
+
 	return 0;
 }
