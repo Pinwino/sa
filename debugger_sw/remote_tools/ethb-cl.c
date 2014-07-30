@@ -55,28 +55,22 @@ static int checkIP(char *ip)
 
 int main (int argc, char ** argv)
 {
-	
 	access_caloe access;
 	network_connection nc;
-	int c;
+	int c, i;
 	unsigned int base = def_init_offset;
-	FILE *fp;                                                                             
+	FILE *fp;
 	
 	uint32_t cntr = 0;
-	char *line = (char *) malloc (nbytes + 1);
 	
-	const char tok[] = " ", t[]="/";
-   	char *ret;
    	char *ptr;
+   	char *s_val[3];
+   	char *line = (char *) malloc (nbytes + 1);
 
 	char *ip = (char *) malloc(conf_buf);
-	char * offset;
-	char * val;
-	uint32_t _val, _offset;
-	unsigned long length, line_length=0;
+	uint32_t u_val[2];
 	
 	strcpy(ip, def_ethb_conf);
-	
 	
 	while ((c = getopt (argc, argv, "a:e:h")) != -1)
 	{
@@ -124,24 +118,28 @@ int main (int argc, char ** argv)
 		}
 	}
 	
-	if (optind >= argc) {
+	if (optind >= argc) 
+	{
 		fprintf(stderr, "%s: Expected new ram file after options.\n",
 			argv[0]);
 		exit(1);
 	}
 	
-	printf("WARNING: RAM located at 0x%x will be overwritten with %s (acces by %s)\n",
+	printf(
+	"WARNING: RAM located at 0x%x will be overwritten with %s (acces by %s)\n",
 	          base, argv[optind], ip);
 	printf("Do you want to proceed? (y/n): ");
 	char proceed;
 	for(;;)
 	{
 		scanf("%s", &proceed);
-		if (proceed == 'y'){
+		if (proceed == 'y')
+		{
 			printf("Memory overwrite will proceed, please wait... \n");
 			break;
 		}
-		else if (proceed == 'n'){
+		else if (proceed == 'n')
+		{
 			printf("Don't panic. Overwrite aborted!\n");
 			return 0;
 		}
@@ -160,58 +158,58 @@ int main (int argc, char ** argv)
 	}
 
 		while (fgets(line, nbytes, fp) != NULL) {
-			//I know... don't judge
-			ret=strpbrk(line, "\n");
-			*ret=line_end;
-			offset = strpbrk(line, " ");
-			*offset = line_end;
-			offset++;
-			val = strpbrk(offset, " ");
-			*val=line_end;
-			val++;
-			_offset = (uint32_t)strtol(offset, &ptr, 16)*4;
-			if (ptr && *ptr)
+			s_val[0] = line; /* wtf? why only works this way? */
+			
+			/* parse chain */
+			for (i=1; i<=2; i++)
 			{
-				fprintf(stderr, "    %s: ERROR read offset \"%08x\" is not an hex number\n",
-				              argv[0], _offset);
-				exit(1);
+				s_val[i]=strpbrk(s_val[i-1], " ");
+				*s_val[i]=line_end;
+				s_val[i]++;
 			}
 			
-			_val = (uint32_t) strtol(val, &ret, 16);
-			if (ret && *ret)
+			/* eliminate /n */
+			s_val[0]=strpbrk(s_val[2], "\n");
+			*s_val[0]=line_end;
+
+			for (i=0; i<=1; i++)
 			{
-				fprintf(stderr, "    %s: ERROR read value \"%08x\" is not an hex number\n",
-				              argv[0], _val);
-				exit(1);
+				u_val[i] = (uint32_t)strtol(s_val[i+1], &ptr, 16)*(4-3*i);
+				if (ptr && *ptr)
+				{
+					fprintf(stderr,
+				    "    %s: ERROR \"%s\" is not an hex number\n",
+				              argv[0], s_val[i]);
+					exit(1);
+				}
 			}
 		cntr++;
 
-		build_access_caloe(base, _offset, _val, 0, MASK_OR, is_config_int,
+		build_access_caloe(base, u_val[0], u_val[1], 0, MASK_OR, is_config_int,
 		                      WRITE, SIZE_4B, &nc, &access);
 		if ((execute_caloe(&access)) < 0)
 			exit(1);
-		
-		if ((uint32_t) access.value != _val)
+	
+		if ((uint32_t) access.value != u_val[1])
 		{
-			fprintf(stderr, 
-			        "    %s: ERROR overwritting RAM: access %d (0x%08x), \n",
+			fprintf(stderr,
+			        "    %s: ERROR overwritting RAM: access %0x%08x (%u), \n",
 			               argv[0], cntr, cntr);
 			fprintf(stderr,
 			        "        Values to load from file: offset %s, value to write %s\n",
-			              offset, val);
+			              s_val[0], s_val[1]);
 			fprintf(stderr,
 			        "        Converted values: offset %08x, value %08x\n",
-			              _offset, _val);
+			              u_val[0], u_val[1]);
 			fprintf(stderr,
 			        "        Written values: offset %08x, value %08x\n",
-			              _offset, access.value);
+			              u_val[1], access.value);
 			fprintf(stderr,
 		            "            Difference (written value - read value): %d\n",
-		                 (_val - (uint32_t) access.value));
+		                 (u_val[1] - (uint32_t) access.value));
 
 			exit(1);
 		}
-		access.value = 0;
 	}
 	
 	fclose(fp);
