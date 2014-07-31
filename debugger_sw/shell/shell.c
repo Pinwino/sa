@@ -37,12 +37,16 @@
 
 #define KEY_LEFT (ESCAPE_FLAG | 68)
 #define KEY_RIGHT (ESCAPE_FLAG | 67)
+#define KEY_UP (ESCAPE_FLAG | 65)
+#define KEY_DOWN (ESCAPE_FLAG | 66)
 #define KEY_ENTER (13)
 #define KEY_ESCAPE (27)
 #define KEY_BACKSPACE (127)
 #define KEY_DELETE (126)
 
 static char cmd_buf[SH_MAX_LINE_LEN + 1];
+static char last_cmd_buf[SH_MAX_LINE_LEN + 1];
+static int last_cmd_len = 0;
 static int cmd_pos = 0, cmd_len = 0;
 static int state = SH_PROMPT;
 static int current_key = 0;
@@ -74,6 +78,27 @@ static void delete(int where)
 {
 	memmove(&cmd_buf[where], &cmd_buf[where + 1], cmd_len - where);
 	cmd_len--;
+}
+
+static void swap_str(char *str1, int *str1_len, char *str2, int *str2_len)
+{
+	char str_buf[SH_MAX_LINE_LEN + 1];
+	int str_len_buf;
+	
+//	mprintf("%s\n",__func__);
+	
+//	str1[*str1_len]='\0';
+//	str2[*str2_len]='\0';
+//	mprintf("str1: %s str2: %s\n",str1,str2);
+//	mprintf("cmd_buf: %s last_cmd_buf: %s\n",cmd_buf,last_cmd_buf);
+	
+	strncpy(str_buf,str1,*str1_len);
+	strncpy(str1,str2,*str2_len);
+	strncpy(str2,str_buf,*str1_len);
+	
+	str_len_buf=*str1_len;
+	*str1_len=*str2_len;
+	*str2_len=str_len_buf;
 }
 
 static void esc(char code)
@@ -135,7 +160,7 @@ int shell_exec(const char *cmd)
 
 void shell_init()
 {
-	cmd_len = cmd_pos = 0;
+	cmd_len = cmd_pos = last_cmd_len = 0;
 	state = SH_INIT;
 }
 
@@ -182,7 +207,32 @@ void shell_interactive()
 				}
 				break;
 
+			case KEY_UP:
+				//mprintf("last_cmd_len:%i\n",last_cmd_len);
+				//if(last_cmd_len > 0) {
+					for(;cmd_pos<cmd_len;cmd_pos++) {
+						esc('C');
+					}
+					for(;cmd_pos>0;cmd_pos--) {
+						//delete(cmd_pos - 1);
+						esc('D');
+						esc('P');
+					}
+					swap_str(last_cmd_buf,&last_cmd_len,cmd_buf,&cmd_len);
+					//strncpy(cmd_buf,last_cmd_buf,last_cmd_len);
+					//cmd_len=last_cmd_len;
+					cmd_pos=cmd_len;
+					cmd_buf[cmd_len]='\0';
+					mprintf(cmd_buf); 
+				//}
+				break;
+
 			case KEY_ENTER:
+				if(cmd_len>0) {
+					//mprintf("cmd_len: %i\n",cmd_len);
+					strncpy(last_cmd_buf,cmd_buf,cmd_len);
+					last_cmd_len=cmd_len; 
+				}
 				mprintf("\n");
 				state = SH_EXEC;
 				break;
