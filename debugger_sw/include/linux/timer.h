@@ -1,3 +1,11 @@
+/* This work is part of the White Rabbit project
+ * 
+ * Jose Jimenez  <jjimenez.wr@gmail.com>, Copyright (C) 2014.
+ *
+ * Released according to the GNU GPL version 3 (GPLv3) or later.
+ * 
+ */
+ 
 #ifndef __TIMER_H__
 #define __TIMER_H__
 
@@ -10,7 +18,8 @@
 	unsigned long data;
 };
  
-int setup_timer(struct timer_list *timer, void (*function)(unsigned long), unsigned long data);
+int setup_timer(struct timer_list *timer, void (*function)(unsigned long),
+															unsigned long data);
 int mod_timer(struct timer_list *timer, unsigned long long expires);
  
 /*struct tvec_base {

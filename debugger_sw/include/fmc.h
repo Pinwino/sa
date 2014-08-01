@@ -9,12 +9,11 @@
 
 extern int usleep(useconds_t usec);
 
-struct device {};
+struct device {}; /* Trick or treat! */
 
 /*
- * Yeah! I know it looks bad, andm if course it is not elegant you'll be 
- * gratefull if you need to use one or more of its fields
- *  
+ * Yeah! I know it looks bad, and 0f course it is not ellegant but if any other 
+ * of the structure fields needs to be used this monstes makes the work faster
  */
 struct fmc_device {
 	//unsigned long version;
@@ -46,7 +45,9 @@ struct fmc_device {
 static inline uint32_t fmc_readl(struct fmc_device *fmc, int offset)
 {
 	uint32_t *p= (uint32_t *) offset;
-	/* Looks unncessary? You'd better don't remove it */
+	/* Looks unncessary? Yes, it does. But for any reason it works better than
+	 * usleep(x). So you'd better don't remove it 
+	 */
 	if (offset >= 0x480500 && offset < 0x490000)
 		mprintf("[READ ]: fmc_readl -> Dir %08X val %08X\n", p, *p); 
 	return *p;

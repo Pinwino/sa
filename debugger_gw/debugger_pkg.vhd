@@ -2,7 +2,7 @@
 --	Package File Template
 --
 --	Purpose: This package defines supplemental types, subtypes, 
---		 constants, and functions 
+--           constants, and functions 
 --
 --   To use any of the example code shown below, uncomment the lines and modify as necessary
 --

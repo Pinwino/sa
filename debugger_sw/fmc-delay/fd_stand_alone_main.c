@@ -1,3 +1,14 @@
+/* This work is part of the White Rabbit project
+ * 
+ * Jose Jimenez  <jjimenez.wr@gmail.com>, Copyright (C) 2014.
+ *
+ * Released according to the GNU GPL version 3 (GPLv3) or later.
+ * 
+ * Source code file coaintaine function main and others to implement stand alone
+ * mode.
+ * 
+ */
+
 #include <stdio.h>
 #include <inttypes.h>
 #include <stdlib.h>
@@ -27,7 +38,6 @@
 
 #define stop 1000
 
-
 struct fd_dev fd;
 struct fmc_device fmc_loc;
 
@@ -46,11 +56,6 @@ void _irq_entry()
 {
 	irq_count++;
 	irq_ctrl_pop();
-	if (irq_count == fd_calib_period_s)
-	{
-		fd.temp_timer.function(fd.temp_timer.data);
-		irq_count = 0;
-	}
 	clear_irq();
 }
 
@@ -72,7 +77,8 @@ void kernel_dev(int subsys, const char *fmt, ...)
 
 static void check_stack(void)
 {
-	while (_endram != ENDRAM_MAGIC) {
+	while (_endram != ENDRAM_MAGIC) 
+	{
 		mprintf("Stack overflow!\n");
 		init_iterator+=1000*ENOMEM;
 	}
@@ -102,7 +108,7 @@ static void fd_do_reset(struct fd_dev *fd, int hw_reset)
 		adr=FD_REG_RSTR;
 		fd_writel(fd, val, adr);
 		udelay(10000);
-		val= FD_RSTR_LOCK_W(0xdead) | FD_RSTR_RST_CORE_MASK | FD_RSTR_RST_FMC_MASK;
+		val= FD_RSTR_LOCK_W(0xdead)|FD_RSTR_RST_CORE_MASK|FD_RSTR_RST_FMC_MASK;
 		adr=FD_REG_RSTR;
 		fd_writel(fd, val, adr);
 	}
@@ -117,7 +123,6 @@ static void fd_do_reset(struct fd_dev *fd, int hw_reset)
 	udelay(1000);
 }
 
-/* ************** RESET FUNCTION FOR FD ************** */
 int fd_reset_again(struct fd_dev *fd)
 {
 	unsigned long j;
@@ -153,7 +158,8 @@ int fd_gpio_defaults(struct fd_dev *fd)
 	return 0;
 }
 
-static inline void manage_error (int err_value){
+static inline void manage_error (int err_value)
+{
 	if (err_value < 0)
 		init_iterator += 1000*err_value;
 }
@@ -179,19 +185,17 @@ int main(void)
 	mprintf("_HEAP_START %08x\n", &_HEAP_START);
 	mprintf("_HEAP_END %08x\n", &_HEAP_END);
 
-	
 	mprintf(
 		"\n\n**********************************************************\n"
-	        "*           FMC DEALY on-SPEC STAND-ALONE NODE           *\n"
-	        "*                           by                           *\n"
-            "*                      Jose Jimenez                      *\n"
-            "*                                                        *\n");
+			"*           FMC DEALY on-SPEC STAND-ALONE NODE           *\n"
+			"*                           by                           *\n"
+			"*                      Jose Jimenez                      *\n"
+			"*                                                        *\n");
 	mprintf("*                                                        *\n"
-	        "*                      - WARNING -                       *\n"
-	        "*     This is a beta version, please report bugs to:     *\n"
-            "*            <fmc-delay-1ns-8cha-sa@ohwr.org>            *\n"
-            "**********************************************************\n\n");
-
+			"*                      - WARNING -                       *\n"
+			"*     This is a beta version, please report bugs to:     *\n"
+			"*            <fmc-delay-1ns-8cha-sa@ohwr.org>            *\n"
+			"**********************************************************\n\n");
 
 	fd.fd_regs_base = BASE_FINE_DELAY;
 	fd.fd_owregs_base= fd.fd_regs_base + 0x500;
@@ -215,42 +219,42 @@ int main(void)
 					init_iterator = stop+1;
 				}
 				manage_error(fd_eeprom_read(&fd, 0x50, 0, fd.fmc->eeprom,
-				                               (size_t) (fd.fmc->eeprom_len)));
+											(size_t) (fd.fmc->eeprom_len)));
 				manage_error(fd_handle_eeprom_calibration(&fd));
 
 				free(fd.fmc->eeprom);
 				init_iterator++;
-			break;
+				break;
 
 			case 1:
 				fd_do_reset(&fd, 1);
 				manage_error(fd_spi_init(&fd));
 				usleep(500*1000);
 				init_iterator++;
-			break;
+				break;
 
 			case 2:
 				manage_error(fd_gpio_init(&fd));
 				init_iterator++;
-			break;
+				break;
 
 			case 3:
 				fd_gpio_defaults(&fd);
 				manage_error(fd_pll_init(&fd));
 				init_iterator++;
-			break;
+				break;
 
 			case 4:
 				manage_error(fd_onewire_init (&fd));
 				init_iterator++;
-			break;
+				break;
 
 			case 5:
 				fd_reset_again(&fd);
 				enable_irq();
 				manage_error(fd_acam_init(&fd));
 				init_iterator++;
-			break;
+				break;
 
 			case 6:
 				manage_error(fd_time_init(&fd));
@@ -261,14 +265,14 @@ int main(void)
 				if(tcr != fd_readl(&fd, FD_REG_TCR))
 					fd_writel(&fd, tcr, FD_REG_TCR);
 				init_iterator++;
-			break;
+				break;
 
 			case 7:
 				for (ch = 1; ch <= FD_CH_NUMBER; ch++)
 					fd_gpio_set(&fd, FD_GPIO_OUTPUT_EN(ch));
 				init_iterator++;
 				mprintf("\n*-*-*-*- Node initialized -*-*-*-*\n");
-			break;
+				break;
 
 			case 8:
 				mprintf("\n*-*-*-*- Demo test -*-*-*-*\n");
@@ -278,16 +282,23 @@ int main(void)
 				dev_info(NULL,"Type \"help\" to see command list.\n");
 				dev_info(NULL,
 				      "Use \"<command_name -h>\" to explore commands usage.\n");
+				mprintf("\n");
 				init_iterator++;
-			break;
+				break;
 
 			case 9:
+				if(irq_count >= fd_calib_period_s)
+				{
+					irq_count=0;
+					mprintf("%i, %i, %i\n",irq_count, (irq_count%fd_calib_period_s), !(irq_count%fd_calib_period_s));
+					fd.temp_timer.function(fd.temp_timer.data);
+				}
 				shell_interactive();
-			break;
+				break;
 
 			default:
 					init_iterator = stop;
-			break;
+				break;
 		}
 	}
 	
@@ -297,8 +308,8 @@ int main(void)
 			"       Instead of that restart the node.\n"
 			"       I'm worried what you just read was *RESET* the node...\n"
 			"       What I wrote was *RESTART* the node (unplug stuff...)\n\n");
-    mprintf("     This is a beta version, please report bugs to:     \n"
+	mprintf("     This is a beta version, please report bugs to:     \n"
 			"            <fmc-delay-1ns-8cha-sa@ohwr.org>            \n"
-            "\nAttach the following info:\n"
-            "    Step %i code %i\n", init_iterator/1000, init_iterator&1000);
+			"\nAttach the following info:\n"
+			"    Step %i code %i\n", init_iterator/1000, init_iterator&1000);
 }

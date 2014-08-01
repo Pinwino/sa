@@ -1,28 +1,25 @@
-/**
- ******************************************************************************* 
- * @file cmd_spec.cpp
- *  @brief SPEC command terminal
- *
- *  Copyright (C) 2013
- *
- *  @author Miguel Jimenez Lopez <klyone@ugr.es>
- *
- *  @bug ---
- *
- *******************************************************************************
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 3 of the License, or (at your option) any later version.
- *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library. If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************
+/*
+ * This work is part of the White Rabbit project
+ * 
+ * Jose Jimenez  <jjimenez.wr@gmail.com>, Copyright (C) 2014.
+ * Released according to the GNU GPL version 3 (GPLv3) or later.
+ * 
+ * Tool for virtual UART remote acces by CALoE (Etherbone).
+ * 
+ * Inspiered by:
+ * * 
+ * * @file cmd_spec.cpp
+ * *  @brief SPEC command terminal
+ * *
+ * *  Copyright (C) 2013
+ * *
+ * * @author Miguel Jimenez Lopez <klyone@ugr.es>
+ * *
+ * 
+ * Modifications:
+ * - Main function simplification
+ * - Absolute path building mechainsm for *.cfg files instead of relative path 
+ *   for folder independence calling.
  */
  
 #include "../devices/dio/Dio.h"
@@ -102,91 +99,68 @@ void printf_vuart(string res,string cmd) {
 	if(cmd_first_line)
 		itb++;
 	
-	for(it = itb ; it != ite ; it++) {
+	for(it = itb ; it != ite ; it++){
 		cout << *it <<endl;
 	}
 }
 
 int main ()
 {
-	Vuart vuart_wrpc("./caloe/devices/vuart/vuart.cfg");
-	Vuart vuart("./vuart-dbg.cfg");
-  
+	char *vuart_cfg_path = (char *) malloc(2048*sizeof(char));
+	strcpy(vuart_cfg_path, CURPATH);
+	vuart_cfg_path = strcat(vuart_cfg_path, "/vuart-dbg.cfg");
+	Vuart vuart(vuart_cfg_path);
+
 	string ip;
-	long int len_pulse;
-	timespec t_trig;
-	int ch;
-	char mode;
-	char specific_spec;
-	bool specific_spec_b = false;
 	string cmd;
 	string virtual_cmd;
 	string proto("udp");
-	
-	cout <<endl<<"----------------------------------------------------"<<endl;
-	      cout <<" Fine Delay Stand Alone Mode - Remote Configuration "<<endl;
-		  cout <<"----------------------------------------------------"<<endl;
 
+	cout <<"************************************************************"<<endl;
+	cout <<"*    Fine Delay Stand Alone Mode - Remote Configuration    *"<<endl;
+	cout <<"*                            by                            *"<<endl;
+	cout <<"*                       Jose Jimenez                       *"<<endl;
+	cout <<"*                                                          *"<<endl;
+	cout <<"*                                                          *"<<endl;
+	cout <<"*                       - WARNING -                        *"<<endl;
+	cout <<"*      This is a beta version, please report bugs to:      *"<<endl;
+	cout <<"*             <fmc-delay-1ns-8cha-sa@ohwr.org>             *"<<endl;
+	cout <<"************************************************************"<<endl;
+	cout <<endl;
 
+	ip = get_ip();
+	cmd ="vuart";
 
-		specific_spec_b = true;
-		ip = get_ip();
-		cmd ="vuart";
-			
-	  
-		if (cmd == "exit"){}
-		else {								  
-			if(cmd == "vuart") {
-				string res;
-				char trash;
-				char loop='y';
-																	
-				cout <<endl<< "Warning: Vuart is under testing!!"<<endl;
-				if(!specific_spec_b) {
-					ip = get_ip();
-				}
+	if (cmd == "exit"){}
+	else
+	{
+		if(cmd == "vuart")
+		{
+			string res;
+			char trash;
 
-				cout << "Note: Use \"exit\" to quit the applicattion"<<endl<<endl;
-																	
-				trash = getchar();
-															
-				do {
-					cout << "vuart# ";
-					getline(cin,virtual_cmd);
-														
-					if(virtual_cmd == "exit")
-						loop = 'n';
-									
-					else {
-																			
-						if(HIDE_GUI_STAT_CONT == 1) {
-							if(virtual_cmd == "gui" || virtual_cmd == "stat cont") {
-								cout << "Warning: gui and stat cont must not be used in remote mode (changing to stat cmd)!!"<<endl;
-								virtual_cmd = "stat";
-							}
-						}
-																		
-						vuart.flush(proto+"/"+ip);
-																			
-						if(virtual_cmd == "gui" || virtual_cmd == "stat") {
-							vuart.execute_cmd(proto+"/"+ip,"refresh 0",1);
-							res = vuart.execute_cmd(proto+"/"+ip,virtual_cmd,1);
-							vuart.execute_cmd(proto+"/"+ip,"refresh 1",1);
-						}
-						else
-							res = vuart.execute_cmd(proto+"/"+ip,virtual_cmd,3);
-																			
-																	
-						printf_vuart(res,virtual_cmd);
+			cout <<endl<<"Warning: Vuart is also under testing!!"<<endl;
+			cout <<"Note: Use \"exit\" to quit the applicattion"<<endl<<endl;
+			cout <<"Note: Type \"help\" to see command list"<<endl;
+			cout <<"Note: Use \"<command_name -h>\" to explore commands usage"
+				 <<endl<<endl;
 
-						}
-																	
-					} while(loop == 'y');
-				}
-				else {
-					cout <<endl<<endl<<cmd<<": Unrecognized command"<<endl<<endl;
-				}
+			trash = getchar();
+
+			while (1) /* Dedicated to Nolo from this "poor cable-peeler" */
+			{
+				cout << "vuart# ";
+				getline(cin,virtual_cmd);
+
+				if(virtual_cmd == "exit")
+					break;
+
+				res = vuart.execute_cmd(proto+"/"+ip,virtual_cmd,3);
+				printf_vuart(res,virtual_cmd);
 			}
-  
+		}
+		else
+		cout<<endl<<endl<<cmd<<": Unrecognized command"<<endl<<endl;
+	}
 	return 0;
 }

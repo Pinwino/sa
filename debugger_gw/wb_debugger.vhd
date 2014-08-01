@@ -1,22 +1,24 @@
-----------------------------------------------------------------------------------
--- Company: FREE INDEPENDENT ALLIANCE OF MAKERS
--- Engineer: Jose Jimenez Montañez
--- 
--- Create Date:    21:56:34 06/08/2014 
--- Design Name: 
--- Module Name:    wb_debugger - Behavioral 
--- Project Name: 
--- Target Devices: 
--- Tool versions:
--- Description:
---
--- Dependencies:
---
--- Revision: 
--- Revision 0.01 - File Created
--- Additional Comments: 
---
-----------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-- Title      : Wishbone Debugger component
+-- Project    : FMC DEL 1ns 4cha-stand-alone application (fmc-delay-1ns-4cha-sa)
+-------------------------------------------------------------------------------
+-- File       : wb_debugger.vhd
+-- Author     : Jose Jimenez <jjimenez.wr@gmail.com>
+-- Company    : FREE INDEPENDENT ALLIANCE OF MAKERS (or looking for one)
+-- Created    : 2014-06-08
+-- Last update: 2014-07-31
+-- Platform   : FPGA-generic
+-- Standard   : VHDL'93
+-------------------------------------------------------------------------------
+-- Description: Wihsbone master with slave configuration interface for gateware
+--              debuggin porpuses. Also provides a framework for FMC stand alone
+--              operation.
+-------------------------------------------------------------------------------
+-- Revisions  :
+-- Date        Version  Author          Description
+-- 2014-06-08  1.0      jjimenez        Created
+-------------------------------------------------------------------------------
+
 library IEEE;
 use IEEE.STD_LOGIC_1164.all;
 use IEEE.NUMERIC_STD.all;
@@ -34,15 +36,6 @@ use work.wb_irq_pkg.all;
 use work.debugger_pkg.all;
 
 use work.synthesis_descriptor.all;
-
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx primitives in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
 
 entity wb_debugger is
 	generic(
@@ -283,8 +276,8 @@ begin
 
       irq_slave_o  => irq_slave_o,  -- wb msi interface
       irq_slave_i  => irq_slave_i,
-				
-      ctrl_slave_o => cnx_master_in(c_SLAVE_IRQ_CTRL),                -- ctrl interface for LM32 irq processing
+
+      ctrl_slave_o => cnx_master_in(c_SLAVE_IRQ_CTRL),          -- ctrl interface for LM32 irq processing
       ctrl_slave_i => cnx_master_out(c_SLAVE_IRQ_CTRL)
       );
 

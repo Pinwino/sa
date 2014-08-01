@@ -1,3 +1,10 @@
+/* This work is part of the White Rabbit project
+ * 
+ * Jose Jimenez  <jjimenez.wr@gmail.com>, Copyright (C) 2014.
+ * Released according to the GNU GPL version 3 (GPLv3) or later.
+ *
+ */
+
 #include <string.h>
 #include <dbg.h>
 #include <opt.h>
@@ -17,8 +24,8 @@ static void help(void)
 	        "     -i         : Device/index list\n"
 	        "     -idev_index: Set dev_index address as base addres\n"
 	        "     offset     : Address to acces, if -bbase is not specified\n"
-		    "                : If specfied, the offset respect such address\n"
-		    "     value      : Value to write\n");
+	        "                : If specfied, the offset respect such address\n"
+	        "     value      : Value to write\n");
 }
 
 static int cmd_dbgmem(const char *argv[])

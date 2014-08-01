@@ -1,11 +1,11 @@
 /*
- * This work is part of the FMC DEL 1ns 4cha - stand-alone application
+ * This work is part of the White Rabbit project
  * 
- * Author: Jose Jimenez
+ * Jose Jimenez  <jjimenez.wr@gmail.com>, Copyright (C) 2014.
+ * Released according to the GNU GPL version 3 (GPLv3) or later.
  * 
  * Simple tool for testing memory usage usign Etherbone.
  *
- * Released according to the GNU GPL, version 3 or any later version.
  */
 
 #include <stdio.h>
@@ -22,7 +22,6 @@
 #define is_config_int 	0
 #define nbytes 			100
 #define line_end 		0
-
 
 //ethb-mem-tst
 #define conf_buf 		256

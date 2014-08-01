@@ -1,17 +1,23 @@
 /*
  * This work is part of the White Rabbit project
  *
- * Copyright (C) 2012 CERN (www.cern.ch)
- * Copyright (C) 2012 GSI (www.gsi.de)
- * Author: Tomasz Wlostowski <tomasz.wlostowski@cern.ch>
- * Author: Wesley W. Terpstra <w.terpstra@gsi.de>
- * Author: Grzegorz Daniluk <grzegorz.daniluk@cern.ch>
- *
- * Copyright (C) 2014 UGR (www.ugr.es)
- * Author: Jose Jimenez
- *
- * Released according to the GNU GPL, version 3 or any later version.
+ * Author: Jose Jimenez  <jjimenez.wr@gmail.com>, Copyright (C) 2014.
+ * Released according to the GNU GPL version 3 (GPLv3) or later.
+ * 
+ * Based on
+ * * Copyright (C) 2012 CERN (www.cern.ch)
+ * * Copyright (C) 2012 GSI (www.gsi.de)
+ * * Author: Tomasz Wlostowski <tomasz.wlostowski@cern.ch>
+ * * Author: Wesley W. Terpstra <w.terpstra@gsi.de>
+ * * Author: Grzegorz Daniluk <grzegorz.daniluk@cern.ch>
+ * 
+ * Evolution of shell.c:
+ * - Debbuger promt
+ * - Function for **char length calculation
+ * - Implementantion of a one command history cyclic buffer (up key)
+ * 
  */
+
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
@@ -31,7 +37,6 @@
 #define SH_PROMPT 0
 #define SH_INPUT 1
 #define SH_EXEC 2
-#define SH_INIT 3
 
 #define ESCAPE_FLAG 0x10000
 
@@ -84,14 +89,6 @@ static void swap_str(char *str1, int *str1_len, char *str2, int *str2_len)
 {
 	char str_buf[SH_MAX_LINE_LEN + 1];
 	int str_len_buf;
-	
-//	mprintf("%s\n",__func__);
-	
-//	str1[*str1_len]='\0';
-//	str2[*str2_len]='\0';
-//	mprintf("str1: %s str2: %s\n",str1,str2);
-//	mprintf("cmd_buf: %s last_cmd_buf: %s\n",cmd_buf,last_cmd_buf);
-	
 	strncpy(str_buf,str1,*str1_len);
 	strncpy(str1,str2,*str2_len);
 	strncpy(str2,str_buf,*str1_len);
@@ -161,18 +158,13 @@ int shell_exec(const char *cmd)
 void shell_init()
 {
 	cmd_len = cmd_pos = last_cmd_len = 0;
-	state = SH_INIT;
+	state = SH_PROMPT;
 }
 
 void shell_interactive()
 {
 	int c;
 	switch (state) {
-	case SH_INIT:
-		mprintf("\n");
-		state = SH_PROMPT;
-	break;
-		
 	case SH_PROMPT:
 		mprintf("WR-Dgb# ");
 		cmd_pos = 0;
@@ -208,28 +200,21 @@ void shell_interactive()
 				break;
 
 			case KEY_UP:
-				//mprintf("last_cmd_len:%i\n",last_cmd_len);
-				//if(last_cmd_len > 0) {
 					for(;cmd_pos<cmd_len;cmd_pos++) {
 						esc('C');
 					}
 					for(;cmd_pos>0;cmd_pos--) {
-						//delete(cmd_pos - 1);
 						esc('D');
 						esc('P');
 					}
 					swap_str(last_cmd_buf,&last_cmd_len,cmd_buf,&cmd_len);
-					//strncpy(cmd_buf,last_cmd_buf,last_cmd_len);
-					//cmd_len=last_cmd_len;
 					cmd_pos=cmd_len;
 					cmd_buf[cmd_len]='\0';
 					mprintf(cmd_buf); 
-				//}
 				break;
 
 			case KEY_ENTER:
 				if(cmd_len>0) {
-					//mprintf("cmd_len: %i\n",cmd_len);
 					strncpy(last_cmd_buf,cmd_buf,cmd_len);
 					last_cmd_len=cmd_len; 
 				}

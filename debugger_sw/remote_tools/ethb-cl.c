@@ -1,11 +1,11 @@
 /*
- * This work is part of the FMC DEL 1ns 4cha - stand-alone application
+ * This work is part of the White Rabbit project
  * 
- * Author: Jose Jimenez
+ * Jose Jimenez  <jjimenez.wr@gmail.com>, Copyright (C) 2014.
+ * Released according to the GNU GPL version 3 (GPLv3) or later.
  * 
- * Simple tool for loading wb-debbugger RAM using Etherbone.
+ * Simple tool for secuential WB writing/reading using CALoE/Etherbone.
  *
- * Released according to the GNU GPL, version 3 or any later version.
  */
 
 #include <stdio.h>
@@ -36,7 +36,8 @@ static void help(char *name)
 	fprintf(stderr, 
 	"   -a: RAM base address (default 0x%x)\n", def_init_offset);
 	fprintf(stderr, 
-    "   -e: Transport protocol [udp|tcp]/device IPv4 (default %s)\n", def_ethb_conf);
+	"   -e: Transport protocol [udp|tcp]/device IPv4 (default %s)\n",
+																def_ethb_conf);
 	fprintf(stderr, 
 	"   <ram file>: Path to the .ram file to be loaded\n");
 	
@@ -178,7 +179,7 @@ int main (int argc, char ** argv)
 			if (ptr && *ptr)
 			{
 				fprintf(stderr,
-		     	    "    %s: ERROR \"%s\" is not an hex number\n",
+		     	    "    %s: ERROR \"%c\" is not an hex number\n",
 			                 argv[0], s_val[i]);
 			 	exit(1);
 			}
@@ -193,20 +194,20 @@ int main (int argc, char ** argv)
 		if ((uint32_t) access.value != u_val[1])
 		{
 			fprintf(stderr,
-			        "    %s: ERROR overwritting RAM: access %0x%08x (%u), \n",
+			"    %s: ERROR overwritting RAM: access %0x%08x (%u), \n",
 			               argv[0], cntr, cntr);
 			fprintf(stderr,
-			        "        Values to load from file: offset %s, value to write %s\n",
+			"        Values to load from file: offset %s, value to write %s\n",
 			              s_val[0], s_val[1]);
 			fprintf(stderr,
-			        "        Converted values: offset %08x, value %08x\n",
+			"        Converted values: offset %08x, value %08x\n",
 			              u_val[0], u_val[1]);
 			fprintf(stderr,
-			        "        Written values: offset %08x, value %08x\n",
+			"        Written values: offset %08x, value %08x\n",
 			              u_val[1], access.value);
 			fprintf(stderr,
-		            "            Difference (written value - read value): %d\n",
-		                 (u_val[1] - (uint32_t) access.value));
+		    "            Difference (written value - read value): %d\n",
+							(u_val[1] - (uint32_t) access.value));
 
 			exit(1);
 		}

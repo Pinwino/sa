@@ -1,3 +1,10 @@
+/* This work is part of the White Rabbit project
+ * 
+ * Jose Jimenez  <jjimenez.wr@gmail.com>, Copyright (C) 2014.
+ * Released according to the GNU GPL version 3 (GPLv3) or later.
+ * 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -145,9 +152,9 @@ void tools_report_time(char *name, struct fdelay_time *t, int umode)
 {
 	uint64_t temp = mul_u64 ((u64)t->frac, 8000LLU); 
 	uint64_t picoseconds = 
-	     mul_u64 ((u64)t->coarse ,8000LLU) +
-	     div64_u64_rem(temp, 4096LLU, NULL);
-			
+		mul_u64 ((u64)t->coarse ,8000LLU) +
+		div64_u64_rem(temp, 4096LLU, NULL);
+	
 	printf("%s ", name);
 	switch(umode) {
 	case TOOLS_UMODE_USER:

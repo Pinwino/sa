@@ -1,42 +1,40 @@
 -------------------------------------------------------------------------------
 -- Title      : Fine Delay FMC SPEC (Simple PCI-Express FMC Carrier) top level
--- Project    : Fine Delay FMC (fmc-delay-1ns-4cha)
+--              for stand alone opeartion.
+-- Project    : FMC DEL 1ns 4cha-stand-alone application (fmc-delay-1ns-4cha-sa)
 -------------------------------------------------------------------------------
 -- File       : spec_top_std.vhd
--- Author     : Tomasz Wlostowski
--- Company    : CERN
--- Created    : 2011-08-24
--- Last update: 2014-03-19
+-- Author     : Jose Jimenez <jjimenez.wr@gmail.com>
+-- Company    : FREE INDEPENDENT ALLIANCE OF MAKERS (or looking for one)
+-- Created    : 2014-06-08
+-- Last update: 2014-07-31
 -- Platform   : FPGA-generic
 -- Standard   : VHDL'93
 -------------------------------------------------------------------------------
 -- Description: Top level for the SPEC 1.1 (and later releases) cards with
--- one Fine Delay FMC.
+-- one Fine Delay FMC operating in stand alone mode
 -- Supports:
 -- - SDB enumeration (SDB descriptor at 0x00000)
 -- - White Rabbit and Etherbone
 -- - Interrupts (via WR VIC)
+-- - WB Debbuger component provding stand alone operation
 -------------------------------------------------------------------------------
---
--- Copyright (c) 2011 - 2014 CERN / BE-CO-HT
---
--- This source file is free software; you can redistribute it   
--- and/or modify it under the terms of the GNU Lesser General   
--- Public License as published by the Free Software Foundation; 
--- either version 2.1 of the License, or (at your option) any   
--- later version.                                               
---
--- This source is distributed in the hope that it will be       
--- useful, but WITHOUT ANY WARRANTY; without even the implied   
--- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR      
--- PURPOSE.  See the GNU Lesser General Public License for more 
--- details.                                                     
---
--- You should have received a copy of the GNU Lesser General    
--- Public License along with this source; if not, download it   
--- from http://www.gnu.org/licenses/lgpl-2.1.html
---
+-- Adapted from
+---- Title      : Fine Delay FMC SPEC (Simple PCI-Express FMC Carrier) top level
+---- Project    : Fine Delay FMC (fmc-delay-1ns-4cha)
+---- File       : spec_top.vhd
+---- Author     : Tomasz Wlostowski
+---- Company    : CERN
+---- Created    : 2011-08-24
+---- Last update: 2013-07-25
+---- Platform   : FPGA-generic
+---- Standard   : VHDL'93
 -------------------------------------------------------------------------------
+-- Revisions  :
+-- Date        Version  Author          Description
+-- 2014-06-08  1.0      jjimenez        Created
+-------------------------------------------------------------------------------
+
 library IEEE;
 use IEEE.STD_LOGIC_1164.all;
 use IEEE.NUMERIC_STD.all;
@@ -895,11 +893,9 @@ begin
   fd_owr_in    <= fd_onewire_b;
 
 
-	U_Debugger : wb_debugger
+  U_Debugger : wb_debugger
     generic map(
---      g_dbg_init_file   => "dbg_code.ram"
       g_dbg_init_file   => "FD_node"
---      g_dbg_dpram_size  => 114740/4
       )
     port map(
       clk_sys => clk_sys,

@@ -1,14 +1,22 @@
-/*
- * output-related functions
+/* This work is part of the White Rabbit project
+ * 
+ * Jose Jimenez  <jjimenez.wr@gmail.com>, Copyright (C) 2014.
  *
- * Copyright (C) 2012 CERN (www.cern.ch)
- * Author: Alessandro Rubini <rubini@gnudd.com>
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public License
- * version 2 as published by the Free Software Foundation or, at your
- * option, any later version.
+ * Released according to the GNU GPL version 3 (GPLv3) or later.
+ * 
+ * Adapted from:
+ * *
+ * *output-related functions
+ * *
+ * *Copyright (C) 2012 CERN (www.cern.ch)
+ * *Author: Alessandro Rubini <rubini@gnudd.com>
+ * *
+ * *This program is free software; you can redistribute it and/or
+ * *modify it under the terms of the GNU Lesser General Public License
+ * *version 2 as published by the Free Software Foundation or, at your
+ * *option, any later version.
  */
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -55,12 +63,14 @@ static void fdelay_add_ps(struct fdelay_time *p, uint64_t ps)
 	frac = div_u64_rem((ps << 12), 8000LLU, NULL);
 
 	p->frac += frac;
-	if (p->frac >= 4096) {
+	if (p->frac >= 4096) 
+	{
 		p->frac -= 4096;
 		coarse++;
 	}
 	p->coarse += coarse;
-	if (p->coarse >= 125*1000*1000) {
+	if (p->coarse >= 125*1000*1000) 
+	{
 		p->coarse -= 125*1000*1000;
 		p->utc++;
 	}
@@ -76,13 +86,15 @@ static void fdelay_sub_ps(struct fdelay_time *p, uint64_t ps)
 	coarse_neg = (uint32_t) tmp;
 	frac_neg = div_u64_rem((ps << 12), 8000LLU, NULL);
 
-	if (p->frac < frac_neg) {
+	if (p->frac < frac_neg) 
+	{
 		p->frac += 4096;
 		coarse_neg++;
 	}
 	p->frac -= frac_neg;
 
-	if (p->coarse < coarse_neg) {
+	if (p->coarse < coarse_neg) 
+	{
 		p->coarse += 125*1000*1000;
 		p->utc--;
 	}
@@ -105,14 +117,15 @@ int fdelay_config_pulse(struct fd_dev *fd, int ch, struct fdelay_pulse *pulse)
 	int mode = pulse->mode & 0x7f;
 	uint32_t input_offset, output_offset, output_user_offset;
 	
-	if (mode == FD_OUT_MODE_DELAY || mode == FD_OUT_MODE_DISABLED) {
-		if(pulse->rep < 0 || pulse->rep > 16) /* delay mode allows trains of 1 to 16 pulses. */
+	if (mode == FD_OUT_MODE_DELAY || mode == FD_OUT_MODE_DISABLED) 
+	{ /* delay mode allows trains of 1 to 16 pulses. */
+		if(pulse->rep < 0 || pulse->rep > 16) 
 			return -EINVAL;
 
 		/* check delay lower limits. FIXME: raise an alarm */
-		if (((uint32_t)(pulse->start.utc)) == 0 && pulse->start.coarse * 8  < 600) // 600 ns min delay
+		if (((uint32_t)(pulse->start.utc)) == 0 && 
+							pulse->start.coarse * 8  < 600) // 600 ns min delay
 			return -EINVAL;
-
 	}
 	
 	output_offset = fd->calib.zero_offset[channel];
@@ -122,7 +135,7 @@ int fdelay_config_pulse(struct fd_dev *fd, int ch, struct fdelay_pulse *pulse)
 	switch(mode)
 	{
 		case FD_OUT_MODE_DISABLED:
-		/* hack for Steen/COHAL: if channel is disabled, apply delay-mode offsets */
+	/* hack for Steen/COHAL: if channel is disabled, apply delay-mode offsets */
 		case FD_OUT_MODE_DELAY:
 			fdelay_add_signed_ps(&pulse->start, (signed)output_offset);
 			fdelay_add_signed_ps(&pulse->end, (signed)output_offset);
@@ -144,22 +157,24 @@ int fdelay_config_pulse(struct fd_dev *fd, int ch, struct fdelay_pulse *pulse)
 	fd_ch_writel(fd, ch, pulse->start.coarse,                 FD_REG_C_START);
 	fd_ch_writel(fd, ch, pulse->start.frac,                   FD_REG_F_START);
 	fd_ch_writel(fd, ch, (uint32_t)(pulse->end.utc >> 32),    FD_REG_U_ENDH);
-	fd_ch_writel(fd, ch, (uint32_t) (pulse->end.utc),         FD_REG_U_ENDL);	
-	fd_ch_writel(fd, ch, pulse->end.coarse,                   FD_REG_C_END);	
+	fd_ch_writel(fd, ch, (uint32_t) (pulse->end.utc),         FD_REG_U_ENDL);
+	fd_ch_writel(fd, ch, pulse->end.coarse,                   FD_REG_C_END);
 	fd_ch_writel(fd, ch, pulse->end.frac,                     FD_REG_F_END);
 	fd_ch_writel(fd, ch, (uint32_t) (pulse->loop.utc),        FD_REG_U_DELTA);
 	fd_ch_writel(fd, ch, pulse->loop.coarse,                  FD_REG_C_DELTA);
 	fd_ch_writel(fd, ch, pulse->loop.frac,                    FD_REG_F_DELTA);
 	
-	
-	if (mode == FD_OUT_MODE_DELAY || mode == FD_OUT_MODE_DISABLED) {
+	if (mode == FD_OUT_MODE_DELAY || mode == FD_OUT_MODE_DISABLED) 
+	{
 		dcr = 0;
-		fd_ch_writel(fd, ch, FD_RCR_REP_CNT_W(pulse->rep - 1)
-			     | (pulse->rep < 0 ? FD_RCR_CONT : 0), FD_REG_RCR);
-	} else {
+		fd_ch_writel(fd, ch, FD_RCR_REP_CNT_W(pulse->rep-1)
+					| (pulse->rep < 0 ? FD_RCR_CONT : 0), FD_REG_RCR);
+	} 
+	else 
+	{
 		dcr = FD_DCR_MODE;
-		fd_ch_writel(fd, ch, FD_RCR_REP_CNT_W(pulse->rep < 0 ? 0 : pulse->rep - 1)
-			    | (pulse->rep < 0 ? FD_RCR_CONT : 0), FD_REG_RCR);
+		fd_ch_writel(fd, ch, FD_RCR_REP_CNT_W(pulse->rep < 0 ? 0 : pulse->rep-1)
+			| (pulse->rep < 0 ? FD_RCR_CONT : 0), FD_REG_RCR);
 	}
 	
 	/*
@@ -179,10 +194,13 @@ int fdelay_config_pulse(struct fd_dev *fd, int ch, struct fdelay_pulse *pulse)
 	delta.tv_sec =((uint32_t) (pulse->loop.utc));
 	delta.tv_nsec = (pulse->loop.coarse) * 8;
 	width.tv_sec = (pulse->end.utc) - (pulse->start.utc);
-	if ((pulse->end.coarse) > (pulse->start.coarse)) {
+	if ((pulse->end.coarse) > (pulse->start.coarse))
+	 {
 		width.tv_nsec = 8 * (pulse->end.coarse)
 			- 8 * (pulse->start.coarse);
-	} else {
+	} 
+	else 
+	{
 		width.tv_sec--;
 		width.tv_nsec = NSEC_PER_SEC 
 			- 8 * (pulse->start.coarse)
@@ -191,9 +209,12 @@ int fdelay_config_pulse(struct fd_dev *fd, int ch, struct fdelay_pulse *pulse)
 
 	/* delta = delta - width (i.e.: delta is the low-signal width */
 	delta.tv_sec -= width.tv_sec;
-	if (delta.tv_nsec > width.tv_nsec) {
+	if (delta.tv_nsec > width.tv_nsec) 
+	{
 		delta.tv_nsec -= width.tv_nsec;
-	} else {
+	} 
+	else 
+	{
 		delta.tv_sec--;
 		delta.tv_nsec = NSEC_PER_SEC - width.tv_nsec + delta.tv_nsec;
 	}
@@ -218,7 +239,7 @@ int fdelay_config_pulse(struct fd_dev *fd, int ch, struct fdelay_pulse *pulse)
 
 /* The "pulse_ps" function relies on the previous one **/
 int fdelay_config_pulse_ps(struct fd_dev *fd,
-			   int channel, struct fdelay_pulse_ps *ps)
+					int channel, struct fdelay_pulse_ps *ps)
 {
 	struct fdelay_pulse p;
 
@@ -231,7 +252,8 @@ int fdelay_config_pulse_ps(struct fd_dev *fd,
 	return fdelay_config_pulse(fd, channel, &p);
 }
 
-int fdelay_get_config_pulse(struct fd_dev *fd, int channel, struct fdelay_pulse *pulse)
+int fdelay_get_config_pulse(struct fd_dev *fd, int channel,
+												struct fdelay_pulse *pulse)
 {
 	uint32_t utc_h, utc_l;
 	uint32_t input_offset, output_offset, output_user_offset;
@@ -251,12 +273,11 @@ int fdelay_get_config_pulse(struct fd_dev *fd, int channel, struct fdelay_pulse 
 		pulse->rep = 0xffffffff;
 	else
 		pulse->rep = FD_RCR_REP_CNT_R(rcr) + 1;
-	
+
 	utc_h = fd_ch_readl(fd, channel, FD_REG_U_STARTH);
 	utc_l = fd_ch_readl(fd, channel, FD_REG_U_STARTL);
 	pulse->start.utc = (((uint64_t)utc_h) << 32) | utc_l;
 
-	
 	pulse->start.coarse = fd_ch_readl(fd, channel, FD_REG_C_START);
 
 	pulse->start.frac = fd_ch_readl(fd, channel, FD_REG_F_START);
@@ -264,15 +285,14 @@ int fdelay_get_config_pulse(struct fd_dev *fd, int channel, struct fdelay_pulse 
 	utc_h = fd_ch_readl(fd, channel, FD_REG_U_ENDH);
 	utc_l = fd_ch_readl(fd, channel, FD_REG_U_ENDL);
 	pulse->end.utc = (((uint64_t)utc_h) << 32) | utc_l;
-	
-	
+
 	pulse->end.coarse = fd_ch_readl(fd, channel, FD_REG_C_END);
 
 	pulse->end.frac = fd_ch_readl(fd, channel, FD_REG_F_END);
-	
+
 	utc_l = fd_ch_readl(fd, channel, FD_REG_U_DELTA);
 	pulse->loop.utc = utc_l;
-	
+
 	pulse->loop.coarse = fd_ch_readl(fd, channel, FD_REG_C_DELTA);
 
 	pulse->loop.frac = fd_ch_readl(fd, channel, FD_REG_F_DELTA);
@@ -281,11 +301,11 @@ int fdelay_get_config_pulse(struct fd_dev *fd, int channel, struct fdelay_pulse 
 	output_offset = fd->calib.zero_offset[channel];
 	output_user_offset = fd->ch_user_offset [channel];
 	input_offset = fd->calib.tdc_zero_offset;
-	
+
 	switch(m)
 	{
 		case FD_OUT_MODE_DISABLED:
-		/* hack for Steen/COHAL: if channel is disabled, apply delay-mode offsets */
+	/* hack for Steen/COHAL: if channel is disabled, apply delay-mode offsets */
 		case FD_OUT_MODE_DELAY:
 			fdelay_add_signed_ps(&pulse->start, -(signed)output_offset);
 			fdelay_add_signed_ps(&pulse->end, -(signed)output_offset);
@@ -306,7 +326,7 @@ int fdelay_get_config_pulse(struct fd_dev *fd, int channel, struct fdelay_pulse 
 }
 
 static void fdelay_subtract_ps(struct fdelay_time *t2,
-				   struct fdelay_time *t1, int64_t *pico)
+								struct fdelay_time *t1, int64_t *pico)
 {
 	uint64_t pico1, pico2;
 
@@ -316,7 +336,7 @@ static void fdelay_subtract_ps(struct fdelay_time *t2,
 }
 
 int fdelay_get_config_pulse_ps(struct fd_dev *fd, int channel, 
-                               struct fdelay_pulse_ps *ps)
+								struct fdelay_pulse_ps *ps)
 {
 	struct fdelay_pulse pulse;
 
@@ -333,5 +353,3 @@ int fdelay_get_config_pulse_ps(struct fd_dev *fd, int channel,
 
 	return 0;
 }
-
-

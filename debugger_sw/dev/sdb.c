@@ -1,27 +1,24 @@
 /*
  * This work is part of the White Rabbit project
- *
- * Copyright (C) 2012 GSI (www.gsi.de)
- * Author: Wesley W. Terpstra <w.terpstra@gsi.de>
- *
- * Released according to the GNU GPL, version 2 or any later version.
+ * 
+ * Author: Jose Jimenez  <jjimenez.wr@gmail.com>, Copyright (C) 2014.
+ * Released according to the GNU GPL version 3 (GPLv3) or later.
+ * 
+ * This is an evolution of sdb.c:
+ * * Copyright (C) 2012 GSI (www.gsi.de)
+ * * Author: Wesley W. Terpstra <w.terpstra@gsi.de>
+ * 
  */
 #include <string.h>
 #include <dbg.h>
 #include "hw/memlayout.h"
 
-//unsigned char *BASE_MINIC;
-//unsigned char *BASE_EP;
-//unsigned char *BASE_SOFTPLL;
-//unsigned char *BASE_PPS_GEN;
-//unsigned char *BASE_SYSCON;
 unsigned char *BASE_UART;
 unsigned char *BASE_ONEWIRE;
 unsigned char *BASE_IRQ_CTRL;
 unsigned char *BASE_TIMER;
 unsigned char *BASE_FINE_DELAY;
 unsigned char *BASE_TICS;
-//unsigned char *BASE_ETHERBONE_CFG;
 //unsigned char *BASE_WRPC_RAM;
 
 #define SDB_INTERCONNET 0x00
